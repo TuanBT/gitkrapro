@@ -1,72 +1,110 @@
-# Tools & Support Files
+# GitKraPro
 
-Support scripts, documentation, and utilities for the project. Not part of the production build.
+GitKraPro patcher for non-commercial use. Supports GitKraken v8.2.0 – 11.x.
 
-## Structure
+## Requirements
 
-```
-tools/
-├── scripts/         # Build & release scripts
-│   ├── release.sh       # Interactive release script (version bump, build, merge, tag)
-│   ├── bundle-assets.py # Bundle CSS/JS assets from legacy project
-│   ├── compile-less.py  # Compile LESS to CSS
-│   ├── debug-versions.js
-│   └── generate-lang-js.py
-├── docs/            # Project documentation & analysis
-│   ├── CONVENTION.md
-│   ├── FEATURE_GAP_ANALYSIS.md
-│   ├── P1_IMPLEMENTATION_PLAN.md
-│   └── UI_UX_REFERENCE.md
-├── testing/         # Playwright smoke tests & test plans
-│   ├── playwright.config.ts  # Playwright configuration
-│   ├── smoke-public.spec.ts  # 22 public page smoke tests
-│   ├── smoke-dynamic.spec.ts # Dynamic page discovery tests (song, artist, etc.)
-│   ├── smoke-auth.spec.ts    # Auth-required page tests (manage/*, profile/*)
-│   └── pages.md              # Manual test plan notes
-├── database/        # SQL scripts
-│   ├── hac_mini.sql
-│   └── generate_score.sql
-├── requests/        # HTTP request files (REST client)
-│   └── products.http
-├── release.command  # macOS double-click release launcher
-├── release.bat      # Windows double-click release launcher
-├── build-bundles.js # Legacy JS bundle builder
-├── find_test_songs.js
-└── writefile.js
-```
+- [Node.js](https://nodejs.org/) >= 18 LTS
+- [Yarn](https://yarnpkg.com/) (`npm install --global yarn`)
+- [GitKraken](https://www.gitkraken.com/git-client/try-free) v8.2.0 – 11.x
 
-## Smoke Tests (Playwright)
-
-Automated tests that visit every page and check for runtime errors (500, Next.js error overlays). Run before prod builds to catch regressions.
-
-**Prerequisites:** Dev server running on `localhost:3000` with database accessible.
+## Setup
 
 ```bash
-npm run test          # Run all smoke tests
-npm run test:smoke    # Run with list reporter (verbose output)
+git clone <repo-url>
+cd <repo-dir>
+yarn install
+yarn build
 ```
 
-**Test files:**
-- `smoke-public.spec.ts` — 22 static public pages (home, about, genre, search, etc.)
-- `smoke-dynamic.spec.ts` — Dynamic pages discovered from list pages (song detail, artist detail, etc.)
-- `smoke-auth.spec.ts` — Auth-required pages (manage/*, profile/*) using cookie injection
+## Usage
 
-**Environment variables:**
-- `BASE_URL` — Override base URL (default: `http://localhost:3000`)
-- `SMOKE_USER_ID` — User ID for auth tests (default: `1`)
+### macOS (one-click)
+
+Double-click **`crack.command`**.
+
+This script automatically:
+1. Kills GitKraken if running
+2. Removes macOS quarantine attribute
+3. Patches the app
+4. Re-signs with ad-hoc signature (bypasses Gatekeeper)
+
+After GitKraken auto-updates, just run this script again — no manual steps needed.
+
+### Windows
+
+Double-click **`crack.bat`**.
+
+This script automatically:
+1. Kills GitKraken if running
+2. Patches the app
+
+### Manual (all platforms)
 
 ```bash
-SMOKE_USER_ID=123 npm run test:smoke   # Test with specific user
-BASE_URL=https://staging.example.com npm run test:smoke  # Test against staging
+yarn gitkrapro patcher
 ```
 
-## Release Process
-
-Double-click `release.command` (macOS) or `release.bat` (Windows), or run:
+## Patcher Options
 
 ```bash
-./tools/scripts/release.sh          # Interactive (asks for version bump)
-./tools/scripts/release.sh patch    # Auto patch bump (0.0.1 → 0.0.2)
-./tools/scripts/release.sh minor    # Auto minor bump (0.1.0 → 0.2.0)
-./tools/scripts/release.sh major    # Auto major bump (1.0.0 → 2.0.0)
+# Patch with specific feature
+yarn gitkrapro patcher -f pro
+
+# Use a specific app.asar path
+yarn gitkrapro patcher -a /path/to/app.asar
+
+# Run specific actions only
+yarn gitkrapro patcher backup unpack patch pack remove
 ```
+
+## Other Commands
+
+```bash
+# Show info
+yarn gitkrapro about
+
+# Generate AppId
+yarn gitkrapro appid generate
+
+# Read current AppId from config
+yarn gitkrapro appid read
+
+# Read encrypted secFile
+yarn gitkrapro secfile <file>
+```
+
+## Block Auto-Updates (Optional)
+
+### Windows
+Add to `C:\Windows\System32\drivers\etc\hosts`:
+```
+127.0.0.1 release.gitkraken.com
+```
+Or delete `update.exe` in `%LOCALAPPDATA%\gitkraken\`.
+
+### macOS / Linux
+Add to `/etc/hosts`:
+```
+127.0.0.1 release.gitkraken.com
+```
+
+## Project Structure
+
+```
+├── crack.command     # macOS one-click script
+├── crack.bat         # Windows one-click script
+├── bin/              # CLI entry points
+├── src/              # Core source code
+│   ├── patcher.ts    # Main patching logic
+│   ├── appId.ts      # AppId generation/reading
+│   ├── secFile.ts    # Encrypted file reader
+│   ├── platform.ts   # Platform detection
+│   └── logo.ts       # CLI logo
+├── patches/          # Diff patch files
+└── types/            # TypeScript type declarations
+```
+
+## License
+
+MIT
