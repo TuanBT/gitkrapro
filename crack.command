@@ -30,19 +30,29 @@ fi
 echo "==> Removing quarantine attribute for: $APP_PATH"
 xattr -dr com.apple.quarantine "$APP_PATH" 2>/dev/null || true
 
-# 3. Run patcher
-echo "==> Running patcher..."
+# 3. Build project if needed
 cd "$(dirname "$0")"
+if [ ! -d "node_modules" ]; then
+    echo "==> Installing dependencies..."
+    yarn install
+fi
+if [ ! -d "dist" ]; then
+    echo "==> Building project..."
+    yarn build
+fi
+
+# 4. Run patcher
+echo "==> Running patcher..."
 if ! yarn gitkrapro patcher; then
     echo "Error: Patcher failed!"
     exit 1
 fi
 
-# 4. Re-sign with ad-hoc signature (bypass Gatekeeper after patching)
+# 5. Re-sign with ad-hoc signature (bypass Gatekeeper after patching)
 echo "==> Re-signing app with ad-hoc signature..."
 codesign --force --deep --sign - "$APP_PATH" 2>/dev/null || true
 
-# 5. Clear quarantine again after codesign
+# 6. Clear quarantine again after codesign
 xattr -dr com.apple.quarantine "$APP_PATH" 2>/dev/null || true
 
 echo "==> All done! You can open GitKraken now."
