@@ -104,7 +104,3 @@ Add to `/etc/hosts`:
 ├── patches/          # Diff patch files
 └── types/            # TypeScript type declarations
 ```
-
-## License
-
-MIT

@@ -2,10 +2,8 @@
   "name": "gitkrapro",
   "description": "GitKraPro patcher for non-commercial use",
   "author": "Tuan",
-  "version": "8.4.0",
-  "license": "MIT",
+  "version": "1.0.0",
   "private": true,
-  "homepage": "https://blog.jubeat.net/",
   "main": "dist/index.js",
   "bin": {
     "gitkrapro": "dist/bin/gitkrapro.js"
